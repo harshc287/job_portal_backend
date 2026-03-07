@@ -1,25 +1,31 @@
+require("dotenv").config()
+
 const express = require("express")
-const mongoose = require("mongoose")
-const dotenv = require("dotenv")
 const cors = require("cors")
+
+const connectDB = require("./config/db")
 
 const authRoutes = require("./routes/authRoutes")
 const jobRoutes = require("./routes/jobRoutes")
 const applicationRoutes = require("./routes/applicationRoutes")
+const companyRoutes = require("./routes/companyRoutes")
+const interviewRoutes = require("./routes/interviewRoutes")
+const adminRoutes = require("./routes/adminRoutes")
 const userRoutes = require("./routes/userRoutes")
 
-dotenv.config()
-
 const app = express()
+
+connectDB()
 
 app.use(cors())
 app.use(express.json())
 
-require("./config/db")
-
 app.use("/api/auth", authRoutes)
 app.use("/api/jobs", jobRoutes)
 app.use("/api/applications", applicationRoutes)
+app.use("/api/companies", companyRoutes)
+app.use("/api/interviews", interviewRoutes)
+app.use("/api/admin", adminRoutes)
 app.use("/api/users", userRoutes)
 
 const PORT = process.env.PORT || 5000
