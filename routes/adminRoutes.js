@@ -19,4 +19,4 @@ router.delete("/users/:id", protect, roleCheck("admin"), deleteUser)
 
 router.delete("/jobs/:id", protect, roleCheck("admin"), deleteJobAdmin)
 
-module.exports = router
+module.exports =  router

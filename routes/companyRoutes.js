@@ -12,6 +12,7 @@ const {
  deleteCompany
 } = require("../controllers/companyController")
 
+
 router.post("/", protect, roleCheck("employer"), createCompany)
 
 router.get("/", getCompanies)

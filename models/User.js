@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   },
 
   email:{
-    type:String,
+    type:String, 
     unique:true,
     required:true
   },
@@ -27,9 +27,9 @@ const userSchema = new mongoose.Schema({
 
   skills:[String],
 
-  resume:String,
+  resume: String,
 
-  profilePhoto:String,
+  profilePhoto: String,
 
   experience:[
     {
