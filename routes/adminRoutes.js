@@ -11,6 +11,8 @@ const {
  deleteJobAdmin
 } = require("../controllers/adminController")
 
+
+
 router.get("/stats", protect, roleCheck("admin"), getDashboardStats)
 
 router.get("/users", protect, roleCheck("admin"), getAllUsers)

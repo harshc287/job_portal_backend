@@ -1,5 +1,6 @@
 const User = require("../models/User")
 const cloudinary = require("../config/cloudinary")
+const fs = require("fs")
 
 /*
 GET USER PROFILE
@@ -28,7 +29,7 @@ exports.getProfile = async (req, res) => {
 /*
 UPLOAD RESUME
 */
-exports.uploadResumeController = async (req, res) => {
+exports.uploadResumeController = async (req, res, next) => {
   try {
 
     if (!req.file) {
@@ -37,12 +38,9 @@ exports.uploadResumeController = async (req, res) => {
       })
     }
 
-    // Upload to cloudinary
     const result = await cloudinary.uploader.upload(
       req.file.path,
-      {
-        resource_type: "raw"
-      }
+      { resource_type: "raw" }
     )
 
     const user = await User.findById(req.user._id)
@@ -57,9 +55,7 @@ exports.uploadResumeController = async (req, res) => {
     })
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    })
+    next(error)
   }
 }
 
