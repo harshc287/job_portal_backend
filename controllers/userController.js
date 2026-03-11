@@ -42,15 +42,15 @@ exports.uploadResumeController = async (req, res, next) => {
     const result = await cloudinary.uploader.upload(
       req.file.path,
       {
-        resource_type: "raw",
-        folder: "resumes"
+        resource_type: "raw"
+        
       }
     )
 
     const user = await User.findById(req.user._id)
 
     // store correct cloudinary URL
-    user.resume = result.secure_url
+    user.resume = result.secure_url.replace("/upload/", "/upload/fl_attachment/")
 
     await user.save()
 
