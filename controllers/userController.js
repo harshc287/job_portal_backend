@@ -30,6 +30,7 @@ exports.getProfile = async (req, res) => {
 UPLOAD RESUME
 */
 exports.uploadResumeController = async (req, res, next) => {
+
   try {
 
     if (!req.file) {
@@ -40,23 +41,30 @@ exports.uploadResumeController = async (req, res, next) => {
 
     const result = await cloudinary.uploader.upload(
       req.file.path,
-      { resource_type: "raw" }
+      {
+        resource_type: "raw",
+        folder: "resumes"
+      }
     )
 
     const user = await User.findById(req.user._id)
 
+    // store correct cloudinary URL
     user.resume = result.secure_url
 
     await user.save()
 
+    fs.unlinkSync(req.file.path)
+
     res.json({
       message: "Resume uploaded successfully",
-      resume: user.resume
+      resume: result.secure_url
     })
 
   } catch (error) {
     next(error)
   }
+
 }
 
 
