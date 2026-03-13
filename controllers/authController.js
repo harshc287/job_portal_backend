@@ -8,6 +8,7 @@ exports.register = async(req,res)=>{
 
  const {name,email,password,role} = req.body
 
+
  const userExists = await User.findOne({email})
 
  if(userExists){
@@ -29,8 +30,9 @@ exports.register = async(req,res)=>{
   token:generateToken(user._id)
  })
 
- }catch(err){
-  res.status(500).json({error:err.message})
+ }catch(error){
+  console.error("Register Error:", error)
+  res.status(500).json({error:error.message})
  }
 
 }

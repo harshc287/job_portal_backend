@@ -141,8 +141,12 @@ exports.addExperience = async(req,res)=>{
 
  const user = await User.findById(req.user._id)
 
- user.experience.push(req.body)
+  if(!user.experience){
+  user.experience = []
+ }
 
+ user.experience.push(req.body)
+console.log(req.body)
  await user.save()
 
  res.json(user.experience)
@@ -163,7 +167,12 @@ exports.addEducation = async(req,res)=>{
 
  const user = await User.findById(req.user._id)
 
+   if(!user.education){
+    user.education = []
+  }
+
  user.education.push(req.body)
+console.log(req.body)
 
  await user.save()
 
