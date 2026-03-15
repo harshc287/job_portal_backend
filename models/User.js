@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
     enum:["jobseeker","employer","admin"],
     default:"jobseeker"
   },
+  isBanned:{
+ type:Boolean,
+ default:false
+},
 
   skills:[String],
 

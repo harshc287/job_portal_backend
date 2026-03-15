@@ -4,24 +4,46 @@ exports.createJob = async(req,res)=>{
 
  try{
 
- const job = await Job.create({
-  ...req.body,
-  postedBy:req.user._id
- })
+  const job = await Job.create({
 
- res.json(job)
+   title:req.body.title,
+   company:req.body.company,
+   location:req.body.location,
+   description:req.body.description,
+   employer:req.user._id,
+   status:"pending"
 
- }catch(err){
-  res.status(500).json({error:err.message})
+  })
+
+  res.json(job)
+
+ }catch(error){
+
+  res.status(500).json({
+   message:error.message
+  })
+
  }
 
 }
 
 exports.getJobs = async(req,res)=>{
 
- const jobs = await Job.find().populate("postedBy","name")
+ try{
 
- res.json(jobs)
+  const jobs = await Job.find({
+   status:"approved"
+  })
+
+  res.json(jobs)
+
+ }catch(error){
+
+  res.status(500).json({
+   message:error.message
+  })
+
+ }
 
 }
 
