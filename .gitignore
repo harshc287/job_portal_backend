@@ -1,4 +1,8 @@
 # Logs
+.pdf
+img
+.env
+
 logs
 *.log
 npm-debug.log*
