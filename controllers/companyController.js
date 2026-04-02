@@ -1,22 +1,45 @@
 const Company = require("../models/Company")
 
-exports.createCompany = async(req,res)=>{
+// CREATE COMPANY
+exports.createCompany = async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      website,
+      location,
+      logo,
+      industry,
+      size,
+      foundedYear
+    } = req.body
 
- try{
+    // ✅ Basic validation
+    if (!name) {
+      return res.status(400).json({ message: "Company name is required" })
+    }
 
- const company = await Company.create({
-   ...req.body,
-   owner:req.user._id
- })
+    const company = await Company.create({
+      name,
+      description,
+      website,
+      location,
+      logo,
+      industry,
+      size,
+      foundedYear,
+      owner: req.user._id
+    })
 
- res.status(201).json(company)
+    res.status(201).json(company)
 
- }catch(err){
-  res.status(500).json({error:err.message})
- }
-
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
 }
 
+
+// GET ALL COMPANIES
 exports.getCompanies = async (req, res) => {
   try {
     const companies = await Company.find()
@@ -29,16 +52,26 @@ exports.getCompanies = async (req, res) => {
   }
 }
 
+
+// GET SINGLE COMPANY
 exports.getCompanyById = async (req, res) => {
-  const company = await Company.findById(req.params.id)
+  try {
+    const company = await Company.findById(req.params.id)
+      .populate("owner", "name email")
 
-  if (!company) {
-    return res.status(404).json({ message: "Company not found" })
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" })
+    }
+
+    res.json(company)
+
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
-
-  res.json(company)
 }
 
+
+// GET MY COMPANIES (EMPLOYER)
 exports.getMyCompanies = async (req, res) => {
   try {
     const companies = await Company.find({
@@ -52,6 +85,8 @@ exports.getMyCompanies = async (req, res) => {
   }
 }
 
+
+// UPDATE COMPANY
 exports.updateCompany = async (req, res) => {
   try {
     const company = await Company.findById(req.params.id)
@@ -60,25 +95,35 @@ exports.updateCompany = async (req, res) => {
       return res.status(404).json({ message: "Company not found" })
     }
 
-    // 🔐 ONLY OWNER
+    // 🔐 Only owner
     if (company.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized" })
     }
 
-    const updated = await Company.findByIdAndUpdate(
+    const updatedCompany = await Company.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      {
+        name: req.body.name,
+        description: req.body.description,
+        website: req.body.website,
+        location: req.body.location,
+        logo: req.body.logo,
+        industry: req.body.industry,
+        size: req.body.size,
+        foundedYear: req.body.foundedYear
+      },
       { new: true }
     )
 
-    res.json(updated)
+    res.json(updatedCompany)
 
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
 }
 
-// DELETE
+
+// DELETE COMPANY
 exports.deleteCompany = async (req, res) => {
   try {
     const company = await Company.findById(req.params.id)
@@ -87,7 +132,7 @@ exports.deleteCompany = async (req, res) => {
       return res.status(404).json({ message: "Company not found" })
     }
 
-    // 🔐 OWNER OR ADMIN
+    // 🔐 Owner or Admin
     if (
       company.owner.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
@@ -97,7 +142,7 @@ exports.deleteCompany = async (req, res) => {
 
     await company.deleteOne()
 
-    res.json({ message: "Company deleted" })
+    res.json({ message: "Company deleted successfully" })
 
   } catch (err) {
     res.status(500).json({ message: err.message })

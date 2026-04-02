@@ -32,7 +32,9 @@ const companySchema = new mongoose.Schema({
   },
 
   foundedYear:{
-    type:Number
+    type:Number,
+      min: 1800,
+  max: new Date().getFullYear()
   },
 
   owner:{

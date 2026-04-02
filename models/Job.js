@@ -34,12 +34,12 @@ const jobSchema = new mongoose.Schema({
   employer:{
   type:mongoose.Schema.Types.ObjectId,
   ref:"User"
- },
+ }
 
-  postedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }
+  // postedBy: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "User"
+  // }
 },{
   timestamps:true
 })
