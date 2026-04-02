@@ -9,7 +9,7 @@ exports.createCompany = async(req,res)=>{
    owner:req.user._id
  })
 
- res.json(company)
+ res.status(201).json(company)
 
  }catch(err){
   res.status(500).json({error:err.message})
@@ -17,38 +17,89 @@ exports.createCompany = async(req,res)=>{
 
 }
 
-exports.getCompanies = async(req,res)=>{
+exports.getCompanies = async (req, res) => {
+  try {
+    const companies = await Company.find()
+      .populate("owner", "name email")
 
- const companies = await Company.find().populate("owner","name email")
+    res.json(companies)
 
- res.json(companies)
-
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
 }
 
-exports.getCompanyById = async(req,res)=>{
+exports.getCompanyById = async (req, res) => {
+  const company = await Company.findById(req.params.id)
 
- const company = await Company.findById(req.params.id)
+  if (!company) {
+    return res.status(404).json({ message: "Company not found" })
+  }
 
- res.json(company)
-
+  res.json(company)
 }
 
-exports.updateCompany = async(req,res)=>{
+exports.getMyCompanies = async (req, res) => {
+  try {
+    const companies = await Company.find({
+      owner: req.user._id
+    })
 
- const company = await Company.findByIdAndUpdate(
-  req.params.id,
-  req.body,
-  {new:true}
- )
+    res.json(companies)
 
- res.json(company)
-
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
 }
 
-exports.deleteCompany = async(req,res)=>{
+exports.updateCompany = async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id)
 
- await Company.findByIdAndDelete(req.params.id)
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" })
+    }
 
- res.json({message:"Company deleted"})
+    // 🔐 ONLY OWNER
+    if (company.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" })
+    }
 
+    const updated = await Company.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    )
+
+    res.json(updated)
+
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+}
+
+// DELETE
+exports.deleteCompany = async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id)
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" })
+    }
+
+    // 🔐 OWNER OR ADMIN
+    if (
+      company.owner.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Not authorized" })
+    }
+
+    await company.deleteOne()
+
+    res.json({ message: "Company deleted" })
+
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
 }

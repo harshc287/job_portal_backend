@@ -1,62 +1,67 @@
 const Job = require("../models/Job")
 
-exports.createJob = async(req,res)=>{
+// ✅ CREATE JOB
+exports.createJob = async (req, res) => {
+  try {
+    const { title, company, location, description, salary } = req.body
 
- try{
+    if (!title || !company || !location) {
+      return res.status(400).json({
+        message: "Title, company and location are required"
+      })
+    }
 
-  const job = await Job.create({
+    const job = await Job.create({
+      title,
+      company,
+      location,
+      description,
+      salary,
+      employer: req.user._id,
+      status: "pending" // 🔥 change to "approved" if needed
+    })
 
-   title:req.body.title,
-   company:req.body.company,
-   location:req.body.location,
-   description:req.body.description,
-   employer:req.user._id,
-   status:"pending"
+    return res.status(201).json(job)
 
-  })
-
-res.status(201).json(job)
-
-
- }catch(error){
-
-  res.status(500).json({
-   message:error.message
-  })
-
- }
-
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
 }
 
-exports.getJobs = async(req,res)=>{
+// ✅ GET ALL JOBS (FILTER + SEARCH + PAGINATION)
+exports.getJobs = async (req, res) => {
+  try {
+    let query = { status: "approved" }
 
- try{
+    // 🔍 Search
+    if (req.query.keyword) {
+      query.title = { $regex: req.query.keyword, $options: "i" }
+    }
 
-  const jobs = await Job.find({
-   status:"approved"
-  })
+    // 📍 Location filter
+    if (req.query.location) {
+      query.location = { $regex: req.query.location, $options: "i" }
+    }
 
-  res.json(jobs)
+    // 📄 Pagination
+    const page = Number(req.query.page) || 1
+    const limit = 6
+    const skip = (page - 1) * limit
 
- }catch(error){
+    const jobs = await Job.find(query)
+      .sort({ createdAt: -1 }) // latest first
+      .skip(skip)
+      .limit(limit)
 
-  res.status(500).json({
-   message:error.message
-  })
+    return res.json(jobs)
 
- }
-
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
 }
 
-exports.getJobById = async(req,res)=>{
-
- const job = await Job.findById(req.params.id)
-
- res.json(job)
-
-}
-
-exports.deleteJob = async (req, res) => {
+// ✅ GET SINGLE JOB
+exports.getJobById = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
 
@@ -64,41 +69,28 @@ exports.deleteJob = async (req, res) => {
       return res.status(404).json({ message: "Job not found" })
     }
 
-    // 🔐 Only owner or admin
-    if (
-      job.employer.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
-      return res.status(403).json({ message: "Not authorized" })
-    }
-
-    await job.deleteOne()
-
-    res.json({ message: "Job removed" })
+    return res.json(job)
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    })
+    return res.status(500).json({ message: error.message })
   }
 }
 
-// GET MY JOBS
+// ✅ GET MY JOBS (EMPLOYER)
 exports.getMyJobs = async (req, res) => {
   try {
     const jobs = await Job.find({
-      employer: req.user._id   // 🔥 filter by logged-in user
-    })
+      employer: req.user._id
+    }).sort({ createdAt: -1 })
 
-    res.json(jobs)
+    return res.json(jobs)
+
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    })
+    return res.status(500).json({ message: error.message })
   }
 }
 
-// UPDATE JOB
+// ✅ UPDATE JOB
 exports.updateJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
@@ -107,7 +99,7 @@ exports.updateJob = async (req, res) => {
       return res.status(404).json({ message: "Job not found" })
     }
 
-    // 🔐 Only owner can update
+    // 🔐 Only owner
     if (job.employer.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized" })
     }
@@ -118,11 +110,34 @@ exports.updateJob = async (req, res) => {
       { new: true }
     )
 
-    res.json(updatedJob)
+    return res.json(updatedJob)
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    })
+    return res.status(500).json({ message: error.message })
+  }
+}
+
+// ✅ DELETE JOB
+exports.deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id)
+
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" })
+    }
+
+    if (
+      job.employer.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Not authorized" })
+    }
+
+    await job.deleteOne()
+
+    return res.json({ message: "Job removed" })
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
   }
 }

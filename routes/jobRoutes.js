@@ -13,14 +13,17 @@ const {
   updateJob
 } = require("../controllers/jobController")
 
+router.get("/my", protect, roleCheck("employer"), getMyJobs) //  NEW
+
+// ✅ Public routes
 router.get("/", getJobs)
 router.get("/:id", getJobById)
 
+// ✅ Protected routes
 router.post("/", protect, roleCheck("employer"), createJob)
 
 router.delete("/:id", protect, roleCheck("employer","admin"), deleteJob)
 
-router.get("/my", protect, roleCheck("employer"), getMyJobs) //  NEW
 router.put("/:id", protect, roleCheck("employer"), updateJob) //  NEW
 
 module.exports = router
