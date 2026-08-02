@@ -22,7 +22,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173", // for local development
-      "https://job-portal-frontend-git-main-harshc287s-projects.vercel.app/" // replace with your actual Vercel URL
+      "https://job-portal-frontend-seven-eosin.vercel.app" // replace with your actual Vercel URL
     ],
     credentials: true,
   })
