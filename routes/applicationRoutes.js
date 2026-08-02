@@ -1,15 +1,18 @@
-const express = require("express")
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
-const protect = require("../middleware/authMiddleware")
+const protect = require("../middleware/authMiddleware");
 
 const {
- applyJob,
- myApplications
-} = require("../controllers/applicationController")
+  applyJob,
+  myApplications,
+  withdrawApplication
+} = require("../controllers/applicationController");
 
-router.post("/apply/:jobId", protect, applyJob)
+router.post("/apply/:jobId", protect, applyJob);
 
-router.get("/my", protect, myApplications)
+router.get("/my", protect, myApplications);
 
-module.exports = router
+router.delete("/withdraw/:id", protect, withdrawApplication);
+
+module.exports = router;

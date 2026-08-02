@@ -1,41 +1,67 @@
-const Application = require("../models/Application")
+const Application = require("../models/Application");
 
-exports.applyJob = async (req,res)=>{
+exports.applyJob = async (req, res) => {
+  try {
+    const existing = await Application.findOne({
+      userId: req.user._id,
+      jobId: req.params.jobId,
+    });
 
- try{
+    if (existing) {
+      return res.status(400).json({ message: "Already applied" });
+    }
 
- const existing = await Application.findOne({
-  userId:req.user._id,
-  jobId:req.params.jobId
- })
+    const application = await Application.create({
+      userId: req.user._id,
+      jobId: req.params.jobId,
+      resume: req.body.resume,
+    });
 
- if(existing){
-  return res.status(400).json({message:"Already applied"})
- }
+    res.json(application);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
- const application = await Application.create({
-  userId:req.user._id,
-  jobId:req.params.jobId,
-  resume:req.body.resume
- })
+exports.myApplications = async (req, res) => {
+  const apps = await Application.find({
+    userId: req.user._id,
+  }).populate("jobId");
 
- res.json(application)
+  res.json(apps);
+};
 
- }catch(err){
+exports.withdrawApplication = async (req, res) => {
+  try {
+    console.log("Application ID:", req.params.id);
+    console.log("User ID:", req.user._id);
 
- res.status(500).json({error:err.message})
+    const byId = await Application.findById(req.params.id);
 
- }
+    console.log("Application by ID:", byId);
 
-}
+    const application = await Application.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
 
-exports.myApplications = async(req,res)=>{
+    console.log("Application with user:", application);
 
- const apps = await Application.find({
-  userId:req.user._id
- }).populate("jobId")
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+      });
+    }
 
- res.json(apps)
+    await application.deleteOne();
 
-}
-
+    res.json({
+      message: "Application withdrawn successfully",
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      error: err.message,
+    });
+  }
+};

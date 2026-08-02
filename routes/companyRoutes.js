@@ -18,9 +18,9 @@ router.post("/", protect, roleCheck("employer"), createCompany)
 
 router.get("/", getCompanies)
 
+router.get("/my/companies", protect, roleCheck("employer"), getMyCompanies)
 router.get("/:id", getCompanyById)
 
-router.get("/my/companies", protect, roleCheck("employer"), getMyCompanies)
 
 
 router.put("/:id", protect, roleCheck("employer"), updateCompany)

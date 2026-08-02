@@ -71,34 +71,34 @@ exports.uploadResumeController = async (req, res, next) => {
 /*
 UPDATE USER PROFILE
 */
-exports.updateProfile = async (req, res) => {
+// exports.updateProfile = async (req, res) => {
 
-  try {
+//   try {
 
-    const user = await User.findById(req.user._id)
+//     const user = await User.findById(req.user._id)
 
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found"
-      })
-    }
+//     if (!user) {
+//       return res.status(404).json({
+//         message: "User not found"
+//       })
+//     }
 
-    user.name = req.body.name || user.name
-    user.skills = req.body.skills || user.skills
+//     user.name = req.body.name || user.name
+//     user.skills = req.body.skills || user.skills
 
-    const updatedUser = await user.save()
+//     const updatedUser = await user.save()
 
-    res.json(updatedUser)
+//     res.json(updatedUser)
 
-  } catch (error) {
+//   } catch (error) {
 
-    res.status(500).json({
-      message: error.message
-    })
+//     res.status(500).json({
+//       message: error.message
+//     })
 
-  }
+//   }
 
-}
+// }
 
 exports.uploadProfilePhoto = async(req,res)=>{
 
@@ -187,3 +187,109 @@ console.log(req.body)
  }
 
 }
+
+// controllers/userController.js
+
+// ... (existing code)
+
+// UPDATE entire profile (name, email, skills, etc.)
+exports.updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Allow updating these fields
+    const { name, email, skills, bio, phone } = req.body;
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (skills) user.skills = skills;
+    if (bio) user.bio = bio;
+    if (phone) user.phone = phone;
+
+    const updatedUser = await user.save();
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// UPDATE a single experience entry
+exports.updateExperience = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const expIndex = user.experience.findIndex(
+      (exp) => exp._id.toString() === req.params.id
+    );
+    if (expIndex === -1) {
+      return res.status(404).json({ message: 'Experience not found' });
+    }
+
+    // Update only the fields that are sent
+    const { company, position, startDate, endDate, description } = req.body;
+    if (company) user.experience[expIndex].company = company;
+    if (position) user.experience[expIndex].position = position;
+    if (startDate) user.experience[expIndex].startDate = startDate;
+    if (endDate) user.experience[expIndex].endDate = endDate;
+    if (description) user.experience[expIndex].description = description;
+
+    await user.save();
+    res.json(user.experience[expIndex]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// DELETE a single experience entry
+exports.deleteExperience = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    user.experience = user.experience.filter(
+      (exp) => exp._id.toString() !== req.params.id
+    );
+    await user.save();
+    res.json({ message: 'Experience deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// UPDATE a single education entry
+exports.updateEducation = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const eduIndex = user.education.findIndex(
+      (edu) => edu._id.toString() === req.params.id
+    );
+    if (eduIndex === -1) {
+      return res.status(404).json({ message: 'Education not found' });
+    }
+
+    const { institution, degree, fieldOfStudy, startYear, endYear } = req.body;
+    if (institution) user.education[eduIndex].institution = institution;
+    if (degree) user.education[eduIndex].degree = degree;
+    if (fieldOfStudy) user.education[eduIndex].fieldOfStudy = fieldOfStudy;
+    if (startYear) user.education[eduIndex].startYear = startYear;
+    if (endYear) user.education[eduIndex].endYear = endYear;
+
+    await user.save();
+    res.json(user.education[eduIndex]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// DELETE a single education entry
+exports.deleteEducation = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    user.education = user.education.filter(
+      (edu) => edu._id.toString() !== req.params.id
+    );
+    await user.save();
+    res.json({ message: 'Education deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
