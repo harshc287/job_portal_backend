@@ -18,6 +18,7 @@ const app = express()
 
 connectDB()
 
+console.log("✅ New CORS configuration loaded");
 app.use(
   cors({
     origin: [
@@ -27,6 +28,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json())
 
 app.get("/", (req, res) => {
