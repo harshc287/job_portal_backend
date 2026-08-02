@@ -18,7 +18,15 @@ const app = express()
 
 connectDB()
 
-app.use(cors())
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // for local development
+      "https://your-vercel-app.vercel.app" // replace with your actual Vercel URL
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json())
 
 app.get("/", (req, res) => {
