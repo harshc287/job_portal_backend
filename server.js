@@ -18,11 +18,11 @@ const app = express()
 
 connectDB()
 
-console.log("✅ New CORS configuration loaded");
+console.log("✅ New CORS configuration loaded"); 
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // for local development
+      "http://localhost:5173", // for local development hi
       "https://job-portal-frontend-seven-eosin.vercel.app" // replace with your actual Vercel URL
     ],
     credentials: true,
