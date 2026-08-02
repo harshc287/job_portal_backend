@@ -21,6 +21,9 @@ connectDB()
 app.use(cors())
 app.use(express.json())
 
+app.get("/", (req, res) => {
+  res.send("Job Portal Backend is Running 🚀");
+});
 app.use("/api/auth", authRoutes)
 app.use("/api/jobs", jobRoutes)
 app.use("/api/applications", applicationRoutes)
